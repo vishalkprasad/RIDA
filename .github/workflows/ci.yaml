@@ -1,0 +1,53 @@
+name: Java CI with Ant
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Ant
+      run: ant -f build.xml jar
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: addition-jar
+        path: dist/lib/Addition.jar
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Install sshpass
+      run: sudo apt-get install sshpass
+
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+    - name: Deploy to EC2
+      env:
+        EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
+      run: |
+        sshpass -p $EC2_PASSWORD ssh -o StrictHostKeyChecking=no $EC2_USERNAME@your-ec2-public-dns "mkdir -p /path/to/your/project && cd /path/to/your/project && rm -rf *"
+        scp -o StrictHostKeyChecking=no dist/lib/Addition.jar $EC2_USERNAME@your-ec2-public-dns:/path/to/your/project/
+        sshpass -p $EC2_PASSWORD ssh -o StrictHostKeyChecking=no $EC2_USERNAME@your-ec2-public-dns "cd /path/to/your/project && java -jar Addition.jar"
