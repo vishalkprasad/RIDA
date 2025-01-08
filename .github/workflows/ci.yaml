@@ -30,25 +30,73 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Ensure the deployment job waits for the build job to complete
+    environment: AWS_Environment
 
+    permissions:
+      id-token: write
+      contents: read
+    
     steps:
-    - name: Install sshpass
-      run: sudo apt-get install sshpass
-
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH key
-      uses: webfactory/ssh-agent@v0.5.3
+    - name: List directory
+      run: ls -al 
+      
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        aws-region: ap-south-1
+    
+    - name: Create Code Deploy
+      id: deploy
+      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+      with:
+        application: GithubActionsXCodedeploy
+        #serviceRoleArn: 
 
-    - name: Deploy to EC2
-      env:
-        EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-        EC2_PASSWORD: ${{ secrets.EC2_PASSWORD }}
-      run: |
-        sshpass -p $EC2_PASSWORD ssh -o StrictHostKeyChecking=no $EC2_USERNAME@your-ec2-public-dns "mkdir -p /path/to/your/project && cd /path/to/your/project && rm -rf *"
-        scp -o StrictHostKeyChecking=no dist/lib/Addition.jar $EC2_USERNAME@your-ec2-public-dns:/path/to/your/project/
-        sshpass -p $EC2_PASSWORD ssh -o StrictHostKeyChecking=no $EC2_USERNAME@your-ec2-public-dns "cd /path/to/your/project && java -jar Addition.jar"
+    - name: Print Commit Message
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+
+  deploy-test:
+    runs-on: ubuntu-latest
+    needs: deploy # Ensure the test deployment job waits for the dev deploy job to complete
+    environment: AWS_Environment
+
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: List directory
+      run: ls -al 
+
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        aws-region: ap-south-1
+    
+    - name: Create Code Deploy for Test
+      id: deploy-test
+      uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
+      with:
+        application: TSTAPP
+        deployment-group: TSTGroup
+        #serviceRoleArn: 
+
+    - name: Print Commit Message for Test
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
