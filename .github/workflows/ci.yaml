@@ -47,7 +47,7 @@ jobs:
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        role-to-assume: arn:aws:iam:::role/OpenIDConnectRole
         aws-region: ap-south-1
     
     - name: Create Code Deploy
