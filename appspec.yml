@@ -8,6 +8,6 @@ file_exists_behavior: OVERWRITE
 branch_config:
     wip\/.*: ~ 
     main:
-        deploymentGroupName: DevGroup
+        deploymentGroupName: RIDA_DEV_GROUP
         deploymentGroupConfig:
-            serviceRoleArn: arn:aws:iam::099269900176:role/CodedeployCustomRole
+            serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
