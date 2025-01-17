@@ -1,3 +1,4 @@
+
 name: Java CI with Ant
 
 on:
@@ -9,158 +10,137 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
         
-      - name: Build with Ant
-        run: ant -f build.xml jar
+    - name: Build with Ant
+      run: ant -f build.xml jar
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: addition-jar
-          path: dist/lib/Addition.jar
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: addition-jar
+        path: dist/lib/Addition.jar
 
   deploy-dev:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Ensure the deployment job waits for the build job to complete
     environment:
-      name: dev
+      name: Dev
+      url: gdbdev.gilead.com
+    #run: echo "Deploying to Dev environment"
+      
     permissions:
       id-token: write
       contents: read
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: List directory
-        run: ls -al 
+    - name: List directory
+      run: ls -al 
       
-      - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam:::role/OpenIDConnectRole
-          aws-region: ap-south-1
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
+        aws-region: us-west-2
     
-      - name: Create Code Deploy
-        id: deploy
-        uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
-        with:
-          application: GithubActionsXCodedeploy
-          #serviceRoleArn: 
+    - name: Create Code Deploy
+      id: deploy-dev
+      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+      with:
+        application: RIDA_DEV
+        #serviceRoleArn: 
 
-      - name: Print Commit Message
-        uses: peter-evans/commit-comment@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
-
-  approval-test:
-    runs-on: ubuntu-latest
-    needs: deploy-dev
-    environment:
-      name: test
-      reviewers:
-        - username1
-    steps:
-      - name: Await Approval
-        run: echo "Awaiting manual approval from username1..."
-        env:
-          DEPLOYMENT_STATUS: "approved"
-          DEPLOYMENT_APPROVER: ${{ github.actor }}
+    - name: Print Commit Message
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
 
   deploy-test:
     runs-on: ubuntu-latest
-    needs: approval-test
+    needs: deploy-dev # Ensure the test deployment job waits for the dev deploy job to complete
+    #environment: AWS_Environment
     environment:
-      name: test
+          name: Test
+          url: gdbtst.gilead.com
+    #run: echo "Deploying to Test environment"
+
     permissions:
       id-token: write
       contents: read
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: List directory
-        run: ls -al 
-
-      - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
-          aws-region: ap-south-1
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
+        aws-region: us-west-2
     
-      - name: Create Code Deploy for Test
-        id: deploy-test
-        uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
-        with:
-          application: TSTAPP
-          deployment-group: TSTGroup
-          #serviceRoleArn: 
+    - name: Create Code Deploy for Test
+      id: deploy-test
+      uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
+      with:
+        application: TSTAPP
+        deployment-group: TSTGroup
+        #serviceRoleArn:
 
-      - name: Print Commit Message for Test
-        uses: peter-evans/commit-comment@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
+    - name: Print Commit Message for Test
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
 
-  approval-prod:
+  deploy-prd:
     runs-on: ubuntu-latest
-    needs: deploy-test
+    needs: deploy-test # Ensure the test deployment job waits for the dev deploy job to complete
+    #environment: AWS_Environment
     environment:
-      name: prod
-      reviewers:
-        - username2
-    steps:
-      - name: Await Approval
-        run: echo "Awaiting manual approval from username2..."
-        env:
-          DEPLOYMENT_STATUS: "approved"
-          DEPLOYMENT_APPROVER: ${{ github.actor }}
+          name: Prod 
+          url: gdb.gilead.com
+    #run: "Deploying to Prod environment"
 
-  deploy-prod:
-    runs-on: ubuntu-latest
-    needs: approval-prod
-    environment:
-      name: prod
     permissions:
       id-token: write
       contents: read
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: List directory
-        run: ls -al 
-
-      - name: Configure AWS Credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam:::role/OpenIDConnectRole
-          aws-region: ap-south-1
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
+        aws-region: us-west-2
     
-      - name: Create Code Deploy for Prod
-        id: deploy-prod
-        uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
-        with:
-          application: ProdApp
-          deployment-group: ProdGroup
-          #serviceRoleArn: 
+    - name: Create Code Deploy for Prod
+      id: deploy-prd
+      uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
+      with:
+        application: PRDAPP
+        deployment-group: PRDGroup
+        #serviceRoleArn:
 
-      - name: Print Commit Message for Prod
-        uses: peter-evans/commit-comment@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            @${{ github.actor }} this was deployed as [${{ steps.deploy-prod.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-prod.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-prod.outputs.deploymentGroupName }}`.
+    - name: Print Commit Message for Test
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
+     
+   
