@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: dist/lib/Addition.jar
-    destination: /var/www/html/
+    destination: /home/ec2-user/java/
     overwrite: true
 file_exists_behavior: OVERWRITE
 branch_config:
