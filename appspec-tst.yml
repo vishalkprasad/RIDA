@@ -1,0 +1,13 @@
+version: 0.0
+os: linux
+files:
+  - source: dist/lib/Addition.jar
+    destination: /home/ec2-user/java/
+    overwrite: true
+file_exists_behavior: OVERWRITE
+branch_config:
+    wip\/.*: ~ 
+    main:
+        deploymentGroupName: RIDA_TST_GROUP
+        deploymentGroupConfig:
+            serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
