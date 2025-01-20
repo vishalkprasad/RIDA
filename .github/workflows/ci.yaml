@@ -68,15 +68,13 @@ jobs:
         body: |
           @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
 
-  deploy-test:
+  deploy-tst:
     runs-on: ubuntu-latest
-    #needs: deploy-dev # Ensure the test deployment job waits for the dev deploy job to complete
-    #environment: AWS_Environment
+    needs: deploy-dev  # Ensure deploy-prod waits for deploy-dev to finish
+  
     environment:
-          name: Test
-          url: gdbtst.gilead.com
-    #run: echo "Deploying to Test environment"
-
+      name: tst
+      url: https://your-prod-url.com   
     permissions:
       id-token: write
       contents: read
@@ -85,38 +83,37 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copy AppSpec File for Dev
-      run: cp appspec-tst.yml appspec.yml 
+    - name: Copy AppSpec File for Tst
+      run: cp appspec-tst.yml appspec.yml
       
     - name: Configure AWS Credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        aws-region: ap-south-1
     
-    - name: Create Code Deploy for Test
-      id: deploy-test
-      uses: webfactory/create-aws-codedeploy-deployment@v0.5.0
+    - name: Create Code Deploy
+      id: deploy
+      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0  # Use the appropriate version
       with:
-        application: TSTAPP
+        application: GithubActionsXCodedeploy
         appspec-file: appspec.yml
+        #serviceRoleArn: arn:aws:iam::099269900176:role/CodedeployCustomRole
 
-    - name: Print Commit Message for Test
+    - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy.outputs.deploymentId }} to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
 
-  deploy-prd:
+  deploy-prod:
     runs-on: ubuntu-latest
-    needs: deploy-test # Ensure the test deployment job waits for the Test deploy job to complete
-    #environment: AWS_Environment
+    needs: deploy-dev  # Ensure deploy-prod waits for deploy-dev to finish
+  
     environment:
-          name: Prod 
-          url: gdb.gilead.com
-    #run: "Deploying to Prod environment"
-
+      name: prod
+      url: https://your-prod-url.com   
     permissions:
       id-token: write
       contents: read
@@ -125,27 +122,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copy AppSpec File for Dev
-      run: cp appspec-dev.yml appspec.yml
-
+    - name: Copy AppSpec File for Prod
+      run: cp appspec-prod.yml appspec.yml
+      
     - name: Configure AWS Credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        aws-region: ap-south-1
     
-    - name: Create Code Deploy for Prod
-      id: deploy-prd
-      uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
+    - name: Create Code Deploy
+      id: deploy
+      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0  # Use the appropriate version
       with:
-        application: PRDAPP
+        application: GithubActionsXCodedeploy
         appspec-file: appspec.yml
+        #serviceRoleArn: arn:aws:iam::099269900176:role/CodedeployCustomRole
 
-    - name: Print Commit Message for Test
+    - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as [${{ steps.deploy-test.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy-test.outputs.deploymentId }}?region=us-east-1) to group `${{ steps.deploy-test.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy.outputs.deploymentId }} to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
      
    
