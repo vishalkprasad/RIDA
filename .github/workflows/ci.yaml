@@ -92,7 +92,7 @@ jobs:
     
     - name: Create Code Deploy for Test
       id: deploy-test
-      uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
+      uses: webfactory/create-aws-codedeploy-deployment@v0.5.0
       with:
         application: TSTAPP
         deployment-group: TSTGroup
