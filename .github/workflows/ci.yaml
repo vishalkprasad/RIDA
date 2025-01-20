@@ -44,8 +44,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: List directory
-      run: ls -al 
+    - name: Copy AppSpec File for Dev
+      run: cp appspec-dev.yml appspec.yml 
       
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
@@ -58,6 +58,7 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_DEV
+        appspec-file: appspec.yml
         #serviceRoleArn: 
 
     - name: Print Commit Message
@@ -84,6 +85,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Copy AppSpec File for Dev
+      run: cp appspec-tst.yml appspec.yml 
+      
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -95,8 +99,7 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment@v0.5.0
       with:
         application: TSTAPP
-        deployment-group: TSTGroup
-        #serviceRoleArn:
+        appspec-file: appspec.yml
 
     - name: Print Commit Message for Test
       uses: peter-evans/commit-comment@v2
@@ -122,6 +125,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Copy AppSpec File for Dev
+      run: cp appspec-dev.yml appspec.yml
+
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -133,8 +139,7 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment@v1.0.2
       with:
         application: PRDAPP
-        deployment-group: PRDGroup
-        #serviceRoleArn:
+        appspec-file: appspec.yml
 
     - name: Print Commit Message for Test
       uses: peter-evans/commit-comment@v2
