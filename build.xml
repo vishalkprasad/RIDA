@@ -2,7 +2,7 @@
 
     <property name="src.dir" value="src"/>
     <property name="build.dir" value="build"/>
-    <property name="dist.dir" value="dist"/>
+    <property name="dist.dir" value="."/>
 
     <target name="init">
         <mkdir dir="${build.dir}"/>
@@ -14,12 +14,11 @@
     </target>
 
     <target name="jar" depends="compile">
-        <mkdir dir="${dist.dir}/lib"/>
-        <jar destfile="${dist.dir}/lib/Addition.jar" basedir="${build.dir}"/>
+        <jar destfile="${dist.dir}/Addition.jar" basedir="${build.dir}"/>
     </target>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
+        <delete file="${dist.dir}/Addition.jar"/>
     </target>
 </project>
