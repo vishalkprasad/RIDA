@@ -53,6 +53,8 @@ jobs:
           exit 1
         fi
           
+    - name: List files in downloaded-artifact
+      run: ls -la ./downloaded-artifact
     - name: Checkout code
       uses: actions/checkout@v3
 
