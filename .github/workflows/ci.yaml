@@ -73,8 +73,14 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Stash Local Changes
+      run: git stash
+
     - name: Pull Latest Changes
       run: git pull origin main
+
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
@@ -135,8 +141,14 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Stash Local Changes
+      run: git stash
+
     - name: Pull Latest Changes
       run: git pull origin main
+
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
@@ -174,7 +186,7 @@ jobs:
         body: |
           @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
 
-  deploy-Prod:
+  deploy-prod:
     runs-on: ubuntu-latest
     needs: deploy-tst
   
@@ -197,14 +209,20 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Stash Local Changes
+      run: git stash
+
     - name: Pull Latest Changes
       run: git pull origin main
+
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
          echo "Listing files before git add..."
          ls -la  # List files to confirm appspec.yml is present
-         if [ -f appspec.yml ]; then
+         if [ -f appspec.yml]; then
            git add appspec.yml
            git diff-index --quiet HEAD || git commit -m "Update appspec.yml file for Dev"
            git push origin main
