@@ -111,10 +111,10 @@ jobs:
 
   deploy-Tst:
     runs-on: ubuntu-latest
-    needs: build
+    needs: deploy-dev
   
     environment:
-      name: Tst
+      name: Test
       url: https://gdbtst.gilead.com  
     permissions:
       id-token: write
