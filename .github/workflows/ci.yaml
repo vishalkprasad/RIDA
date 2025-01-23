@@ -67,6 +67,7 @@ jobs:
 
     - name: Copy AppSpec File for Dev
       run: cp appspec-dev.yml appspec.yml
+
     - name: Configure Git
       run: |
          git config --global user.name 'github-actions[bot]'
@@ -88,7 +89,6 @@ jobs:
            exit 1
          fi
       
-      
     - name: List files
       run: ls -la
       
@@ -105,14 +105,12 @@ jobs:
         application: RIDA_DEV
         appspec-file: appspec.yml
 
-        
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-tst.outputs.deploymentId }} to group `${{ steps.deploy-tst.outputs.deploymentGroupName }}`.
-
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
 
   deploy-tst:
     runs-on: ubuntu-latest
