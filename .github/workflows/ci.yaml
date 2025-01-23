@@ -55,6 +55,10 @@ jobs:
           
     - name: List files in downloaded-artifact
       run: ls -la ./downloaded-artifact
+      
+    - name: Move Addition JAR to Root Directory
+      run: mv ./downloaded-artifact/Addition.jar .
+      
     - name: Checkout code
       uses: actions/checkout@v3
 
