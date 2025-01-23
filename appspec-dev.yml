@@ -4,6 +4,8 @@ files:
   - source: Addition.jar
     destination: /home/ec2-user/
     overwrite: true
+  - source: /
+    destination: /opt/deployment
 hooks:
   BeforeInstall:
     - location: scripts/deploy.sh
