@@ -4,15 +4,10 @@ files:
   - source: Addition.jar
     destination: /home/ec2-user/
     overwrite: true
-file_exists_behavior: OVERWRITE
-hooks:
-  BeforeInstall:
-    - location: script/backup_and_delete.sh
-      timeout: 300
-      runas: root
 branch_config:
-    wip\/.*: ~ 
-    main:
-        deploymentGroupName: RIDA_TST_GROUP
-        deploymentGroupConfig:
-            serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
+  wip\/.*: ~ 
+  main:
+    deploymentGroupName: RIDA_DEV_GROUP
+    deploymentGroupConfig:
+      serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
+            
