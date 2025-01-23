@@ -2,14 +2,14 @@ version: 0.0
 os: linux
 files:
   - source: Addition.jar
-    destination: /home/ec2-user/
+    destination: /home/ec2-user/test/
     overwrite: true
 file_exists_behavior: OVERWRITE
-hooks:
-  BeforeInstall:
-    - location: script/backup_and_delete.sh
-      timeout: 300
-      runas: root
+#hooks:
+  #BeforeInstall:
+    #- location: script/backup_and_delete.sh
+      #timeout: 300
+      #runas: root
 branch_config:
     wip\/.*: ~ 
     main:
