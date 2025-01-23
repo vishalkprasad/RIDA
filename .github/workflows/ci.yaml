@@ -1,4 +1,4 @@
-name: Java CI with Ant
+name: Build, Upload, and Commit Artifact
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       run: ant -f build.xml jar
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: addition-jar
         path: Addition.jar
@@ -31,15 +31,10 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: Dev
-      url: gdbdev.gilead.com
-      
-    permissions:
-      id-token: write
-      contents: read
-    
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Download Addition JAR
       uses: actions/download-artifact@v4
       with:
@@ -48,25 +43,23 @@ jobs:
 
     - name: Check Addition JAR
       run: |
+        echo "Checking if Addition.jar exists in downloaded-artifact directory..."
+        ls -la ./downloaded-artifact
         if [ ! -f ./downloaded-artifact/Addition.jar ]; then
           echo "Error: Addition.jar not found. Make sure it is created in the build job."
           exit 1
         fi
-          
-    - name: List files in downloaded-artifact
-      run: ls -la ./downloaded-artifact
-      
-    - name: Move Addition JAR to Root Directory
-      run: mv ./downloaded-artifact/Addition.jar .
-      
-    - name: Checkout code
-      uses: actions/checkout@v3
 
-    - name: List files
+    - name: Move Addition JAR to Root Directory
+      run: |
+        echo "Moving Addition.jar to root directory..."
+        mv ./downloaded-artifact/Addition.jar .
+        echo "Listing files in root directory after moving Addition.jar..."
+        ls -la
+
+    - name: List files in root directory
       run: ls -la
 
-    - name: List current directory
-      run: pwd
     - name: Configure Git
       run: |
         git config --global user.name 'github-actions[bot]'
@@ -74,6 +67,7 @@ jobs:
 
     - name: Commit Addition JAR
       run: |
+        echo "Listing files before git add..."
         ls -la  # List files to confirm Addition.jar is present
         if [ -f Addition.jar ]; then
           git add Addition.jar
@@ -83,28 +77,6 @@ jobs:
           echo "Error: Addition.jar not found in the root directory."
           exit 1
         fi
-       
-      
-    - name: Configure AWS Credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: us-west-2
-    
-    - name: Create Code Deploy
-      id: deploy-dev
-      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
-      with:
-        application: RIDA_DEV
-        appspec-file: appspec.yml
-
-    - name: Print Commit Message
-      uses: peter-evans/commit-comment@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
-
   deploy-tst:
     runs-on: ubuntu-latest
     needs: deploy-dev
