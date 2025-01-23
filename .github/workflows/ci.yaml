@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Explicitly set the permissions for GITHUB_TOKEN
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -26,38 +28,6 @@ jobs:
       with:
         name: addition-jar
         path: Addition.jar
-      
-
-  deploy-dev:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: write  # Explicitly set the permissions for GITHUB_TOKEN
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Download Addition JAR
-      uses: actions/download-artifact@v4
-      with:
-        name: addition-jar
-        path: ./downloaded-artifact
-
-    - name: Check Addition JAR
-      run: |
-        echo "Checking if Addition.jar exists in downloaded-artifact directory..."
-        ls -la ./downloaded-artifact
-        if [ ! -f ./downloaded-artifact/Addition.jar ]; then
-          echo "Error: Addition.jar not found. Make sure it is created in the build job."
-          exit 1
-        fi
-
-    - name: Move Addition JAR to Root Directory
-      run: |
-        echo "Moving Addition.jar to root directory..."
-        mv ./downloaded-artifact/Addition.jar .
-        echo "Listing files in root directory after moving Addition.jar..."
-        ls -la
 
     - name: List files in root directory
       run: ls -la
@@ -79,6 +49,55 @@ jobs:
           echo "Error: Addition.jar not found in the root directory."
           exit 1
         fi
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs: build
+  
+    environment:
+      name: Dev
+      url: gdbdev.gilead.com  
+    permissions:
+      id-token: write
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy AppSpec File for Dev
+      run: cp appspec-dev.yml appspec.yml
+      
+    - name: Create Deployment Package
+      run: zip -r deployment-package.zip . -x "*.git*"
+
+    - name: List files in Deployment Package
+      run: unzip -l deployment-package.zip
+      
+    - name: List files
+      run: ls -la
+      
+    - name: Configure AWS Credentials using OIDC
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::099269900176:role/OpenIDConnectRoleRIDA
+        aws-region: ap-south-1
+    
+    - name: Create Code Deploy
+      id: deploy-tst
+      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0
+      with:
+        application: GithubActionsXCodedeploy
+        appspec-file: appspec.yml
+
+    - name: Print Commit Message
+      uses: peter-evans/commit-comment@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-tst.outputs.deploymentId }} to group `${{ steps.deploy-tst.outputs.deploymentGroupName }}`.
+
+
   deploy-tst:
     runs-on: ubuntu-latest
     needs: deploy-dev
