@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: src/
+  - source: /home/runner/work/RIDA/RIDA/dist/lib/Addition.jar
     destination: /home/ec2-user/
     overwrite: true
 file_exists_behavior: OVERWRITE
