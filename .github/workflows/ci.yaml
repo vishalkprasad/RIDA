@@ -84,10 +84,10 @@ jobs:
         aws-region: ap-south-1
     
     - name: Create Code Deploy
-      id: deploy-tst
+      id: deploy-dev
       uses: webfactory/create-aws-codedeploy-deployment@v0.4.0
       with:
-        application: GithubActionsXCodedeploy
+        application: RIDA_DEV_GROUP
         appspec-file: appspec.yml
 
     - name: Print Commit Message
