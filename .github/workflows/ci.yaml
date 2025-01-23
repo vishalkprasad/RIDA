@@ -81,15 +81,16 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: ap-south-1
-    
+        aws-region: us-west-2
+
     - name: Create Code Deploy
       id: deploy-dev
-      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0
+      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
-        application: RIDA_DEV_GROUP
+        application: RIDA_DEV
         appspec-file: appspec.yml
 
+        
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
