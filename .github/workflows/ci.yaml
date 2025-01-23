@@ -26,6 +26,7 @@ jobs:
       with:
         name: addition-jar
         path: Addition.jar
+      
 
   deploy-dev:
     runs-on: ubuntu-latest
@@ -39,6 +40,18 @@ jobs:
       contents: read
     
     steps:
+    - name: Download Addition JAR
+      uses: actions/download-artifact@v4
+      with:
+        name: addition-jar
+
+    - name: Check Addition JAR
+      run: |
+          if [ ! -f ./Addition.jar ]; then
+          echo "Error: Addition.jar not found. Make sure it is created in the build job."
+          exit 1
+          fi
+          
     - name: Checkout code
       uses: actions/checkout@v3
 
