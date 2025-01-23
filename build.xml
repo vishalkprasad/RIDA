@@ -19,6 +19,6 @@
 
     <target name="clean">
         <delete dir="${build.dir}"/>
-        <delete file="${dist.dir}/Addition.jar"/>
+        <!-- Removed the line that deletes the Addition.jar file -->
     </target>
 </project>
