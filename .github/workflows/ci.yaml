@@ -75,9 +75,15 @@ jobs:
     - name: Commit Addition JAR
       run: |
         ls -la  # List files to confirm Addition.jar is present
-        git add Addition.jar
-        git commit -m "Add Addition.jar artifact"
-        git push origin main
+        if [ -f Addition.jar ]; then
+          git add Addition.jar
+          git commit -m "Add Addition.jar artifact"
+          git push origin main
+        else
+          echo "Error: Addition.jar not found in the root directory."
+          exit 1
+        fi
+       
       
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
