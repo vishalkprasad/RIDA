@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: src/
+    destination: /home/ec2-user/
+    overwrite: true
+hooks:
+  AfterInstall:
+    - location: src
+      timeout: 300
+      runas: ec2-user
