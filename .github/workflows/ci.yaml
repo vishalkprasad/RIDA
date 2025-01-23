@@ -54,7 +54,7 @@ jobs:
   
     environment:
       name: Dev
-      url: gdbdev.gilead.com  
+      url: https://gdbdev.gilead.com  
     permissions:
       id-token: write
       contents: write
@@ -108,13 +108,14 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
           @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
-deploy-tst:
+
+  deploy-Tst:
     runs-on: ubuntu-latest
     needs: build
   
     environment:
-      name: Dev
-      url: gdbdev.gilead.com  
+      name: Tst
+      url: https://gdbtst.gilead.com  
     permissions:
       id-token: write
       contents: write
@@ -139,7 +140,7 @@ deploy-tst:
          ls -la  # List files to confirm appspec.yml is present
          if [ -f appspec.yml ]; then
            git add appspec.yml
-           git diff-index --quiet HEAD || git commit -m "Update appspec.yml file for Dev"
+           git diff-index --quiet HEAD || git commit -m "Update appspec.yml file for Tst"
            git push origin main
          else
            echo "Error: appspec.yml not found in the root directory."
@@ -168,5 +169,3 @@ deploy-tst:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
           @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
-          
-  
