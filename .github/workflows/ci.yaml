@@ -73,14 +73,14 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Stash Local Changes
-      run: git stash
+    #- name: Stash Local Changes
+      #run: git stash
 
-    - name: Pull Latest Changes
-      run: git pull origin main
+    #- name: Pull Latest Changes
+      #run: git pull origin main
 
-    - name: Apply Stashed Changes
-      run: git stash pop
+    #- name: Apply Stashed Changes
+      #run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
