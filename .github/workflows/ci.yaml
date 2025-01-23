@@ -67,12 +67,18 @@ jobs:
 
     - name: Copy AppSpec File for Dev
       run: cp appspec-dev.yml appspec.yml
-      
-    - name: Create Deployment Package
-      run: zip -r deployment-package.zip . -x "*.git*"
-
-    - name: List files in Deployment Package
-      run: unzip -l deployment-package.zip
+    - name: Commit AppSpec File
+      run: |
+         echo "Listing files before git add..."
+         ls -la  # List files to confirm appspec.yml is present
+         if [ -f appspec.yml ]; then
+            git add appspec.yml
+            git commit -m "Add appspec.yml file"
+            git push origin main
+         else
+            echo "Error: appspec.yml not found in the root directory."
+            exit 1
+         fi
       
     - name: List files
       run: ls -la
