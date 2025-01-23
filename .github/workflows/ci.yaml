@@ -30,7 +30,7 @@ jobs:
 
   deploy-dev:
     runs-on: ubuntu-latest
-    needs: build # Ensure the deployment job waits for the build job to complete
+    needs: build
     environment:
       name: Dev
       url: gdbdev.gilead.com
@@ -47,26 +47,18 @@ jobs:
 
     - name: Check Addition JAR
       run: |
-          if [ ! -f ./Addition.jar ]; then
+        if [ ! -f ./Addition.jar ]; then
           echo "Error: Addition.jar not found. Make sure it is created in the build job."
           exit 1
-          fi
+        fi
           
     - name: Checkout code
       uses: actions/checkout@v3
 
-    #- name: Copy AppSpec File for Dev
-      #run: cp appspec-dev.yml appspec.yml 
-      
-    #- name: Create Deployment Package
-      #run: zip -r deployment-package.zip . -x "*.git*"
-
-    #- name: List files in Deployment Package
-      #run: unzip -l deployment-package.zip
-      
     - name: List files
       run: ls -la
-    - name: List files
+
+    - name: List current directory
       run: pwd
       
     - name: Configure AWS Credentials using OIDC
@@ -81,18 +73,17 @@ jobs:
       with:
         application: RIDA_DEV
         appspec-file: appspec.yml
-        #serviceRoleArn: 
 
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy.outputs.deploymentId }} to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
 
   deploy-tst:
     runs-on: ubuntu-latest
-    needs: deploy-dev  # Ensure deploy-prod waits for deploy-dev to finish
+    needs: deploy-dev
   
     environment:
       name: Test
@@ -125,22 +116,21 @@ jobs:
     
     - name: Create Code Deploy
       id: deploy-tst
-      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0  # Use the appropriate version
+      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0
       with:
         application: GithubActionsXCodedeploy
         appspec-file: appspec.yml
-        #serviceRoleArn: arn:aws:iam::099269900176:role/CodedeployCustomRole
 
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy.outputs.deploymentId }} to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-tst.outputs.deploymentId }} to group `${{ steps.deploy-tst.outputs.deploymentGroupName }}`.
 
   deploy-prod:
     runs-on: ubuntu-latest
-    needs: deploy-tst  # Ensure deploy-prod waits for deploy-dev to finish
+    needs: deploy-tst
   
     environment:
       name: Prod
@@ -173,15 +163,14 @@ jobs:
     
     - name: Create Code Deploy
       id: deploy-prd
-      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0  # Use the appropriate version
+      uses: webfactory/create-aws-codedeploy-deployment@v0.4.0
       with:
         application: GithubActionsXCodedeploy
         appspec-file: appspec.yml
-        #serviceRoleArn: arn:aws:iam::099269900176:role/CodedeployCustomRole
 
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy.outputs.deploymentId }} to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-prd.outputs.deploymentId }} to group `${{ steps.deploy-prd.outputs.deploymentGroupName }}`.
