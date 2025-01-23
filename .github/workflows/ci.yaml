@@ -74,6 +74,7 @@ jobs:
 
     - name: Commit Addition JAR
       run: |
+        ls -la  # List files to confirm Addition.jar is present
         git add Addition.jar
         git commit -m "Add Addition.jar artifact"
         git push origin main
