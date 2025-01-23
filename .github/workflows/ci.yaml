@@ -79,13 +79,8 @@ jobs:
     - name: Pull Latest Changes
       run: git pull origin main
 
-    - name: Apply Stashed Changes Conditionally
-      run: |
-        if git stash list | grep -q 'stash@{0}'; then
-          git stash pop
-        else
-          echo "No stashed changes to apply."
-        fi
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
@@ -152,13 +147,8 @@ jobs:
     - name: Pull Latest Changes
       run: git pull origin main
 
-    - name: Apply Stashed Changes Conditionally
-      run: |
-        if git stash list | grep -q 'stash@{0}'; then
-          git stash pop
-        else
-          echo "No stashed changes to apply."
-        fi
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
@@ -225,13 +215,8 @@ jobs:
     - name: Pull Latest Changes
       run: git pull origin main
 
-    - name: Apply Stashed Changes Conditionally
-      run: |
-        if git stash list | grep -q 'stash@{0}'; then
-          git stash pop
-        else
-          echo "No stashed changes to apply."
-        fi
+    - name: Apply Stashed Changes
+      run: git stash pop
 
     - name: Commit and Push AppSpec File
       run: |
@@ -265,4 +250,6 @@ jobs:
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
-        token: ${{ secrets.G
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
