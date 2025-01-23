@@ -67,6 +67,16 @@ jobs:
 
     - name: List current directory
       run: pwd
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Commit Addition JAR
+      run: |
+        git add Addition.jar
+        git commit -m "Add Addition.jar artifact"
+        git push origin main
       
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
