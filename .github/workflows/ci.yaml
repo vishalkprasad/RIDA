@@ -46,6 +46,12 @@ jobs:
     - name: Copy AppSpec File for Dev
       run: cp appspec-dev.yml appspec.yml 
       
+    - name: Create Deployment Package
+      run: zip -r deployment-package.zip . -x "*.git*"
+
+    - name: List files in Deployment Package
+      run: unzip -l deployment-package.zip
+      
     - name: List files
       run: ls -la
       
