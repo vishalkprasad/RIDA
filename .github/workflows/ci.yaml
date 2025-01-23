@@ -59,7 +59,7 @@ jobs:
       url: gdbdev.gilead.com  
     permissions:
       id-token: write
-      contents: write
+      contents: read
     
     steps:
     - name: Checkout code
