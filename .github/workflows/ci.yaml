@@ -87,6 +87,7 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1
+         fi  
 
     - name: Create Deployment Archive
       run: |
@@ -154,6 +155,7 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1
+         fi
 
     - name: Create Deployment Archive
       run: |
