@@ -47,6 +47,7 @@ jobs:
         else
           echo "Error: Addition.jar not found in the root directory."
           exit 1
+        fi  
 
   deploy-dev:
     runs-on: ubuntu-latest
