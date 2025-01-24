@@ -60,6 +60,9 @@ jobs:
       contents: write
     
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
     - name: Copy AppSpec File for Dev
       run: cp appspec-dev.yml appspec.yml
 
