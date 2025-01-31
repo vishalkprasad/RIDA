@@ -147,6 +147,7 @@ jobs:
     - name: Commit and Push AppSpec File
       run: |
          echo "Listing files before git add..."
+
          ls -la  # List files to confirm appspec.yml is present
          if [ -f appspec.yml ]; then
            git add appspec.yml
@@ -156,11 +157,6 @@ jobs:
            echo "Error: appspec.yml not found in the root directory."
            exit 1
          fi
-
-    - name: Create Deployment Archive
-      run: |
-        zip -r deployment-tst.zip .  # Create a zip archive of the current directory
-        ls -la deployment-tst.zip  # List the contents of the archive to verify
 
     - name: List files
       run: ls -la
