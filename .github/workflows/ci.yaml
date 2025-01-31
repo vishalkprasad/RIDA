@@ -92,10 +92,6 @@ jobs:
            exit 1 
          fi
 
-    - name: Create Deployment Archive
-      run: |
-        zip -r deployment-dev.zip .  # Create a zip archive of the current directory
-        ls -la deployment-dev.zip  # List the contents of the archive to verify
 
     - name: List files
       run: ls -la
