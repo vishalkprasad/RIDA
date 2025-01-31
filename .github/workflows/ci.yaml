@@ -48,6 +48,7 @@ jobs:
         else
           echo "Error: Addition.jar not found in the root directory."
           exit 1
+        fi
 
   deploy-dev:
     runs-on: ubuntu-latest
@@ -89,6 +90,7 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
+         fi
 
     - name: Create Deployment Archive
       run: |
@@ -158,6 +160,7 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
+         fi
 
     - name: List files
       run: ls -la
