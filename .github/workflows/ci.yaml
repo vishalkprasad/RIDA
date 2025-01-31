@@ -36,6 +36,7 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
     - name: Commit Addition JAR
       run: |
         echo "Listing files before git add..."
@@ -47,7 +48,6 @@ jobs:
         else
           echo "Error: Addition.jar not found in the root directory."
           exit 1
-        fi  
 
   deploy-dev:
     runs-on: ubuntu-latest
@@ -73,6 +73,7 @@ jobs:
       run: |
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
     - name: Pull Latest Changes
       run: git pull origin main
 
@@ -82,13 +83,12 @@ jobs:
          ls -la  # List files to confirm appspec.yml is present
          
          if [ -f appspec.yml ]; then
-         git add appspec.yml
+           git add appspec.yml
            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
            git push origin main
-         else:
+         else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi
 
     - name: Create Deployment Archive
       run: |
@@ -142,22 +142,22 @@ jobs:
       run: |
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
     - name: Pull Latest Changes
       run: git pull origin main
 
     - name: Commit and Push AppSpec File
       run: |
          echo "Listing files before git add..."
-
          ls -la  # List files to confirm appspec.yml is present
+         
          if [ -f appspec.yml ]; then
-         git add appspec.yml
+           git add appspec.yml
            git commit -m "Update appspec.yml file for Tst" || echo "No changes to commit"
            git push origin main
-         else:
+         else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi  
 
     - name: List files
       run: ls -la
