@@ -19,7 +19,16 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-        
+
+    - name: Create lib directory and download dependencies
+      run: |
+        mkdir -p lib
+        cd lib
+        curl -O https://repo1.maven.org/maven2/com/cyberark/javapasswordsdk/1.0/javapasswordsdk-1.0.jar
+        curl -O https://repo1.maven.org/maven2/org/apache/commons/commons-logging/1.2/commons-logging-1.2.jar
+        curl -O https://repo1.maven.org/maven2/org/apache/tomcat/tomcat-jdbc/9.0.50/tomcat-jdbc-9.0.50.jar
+        cd ..
+
     - name: Build with Ant
       run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
 
@@ -48,7 +57,6 @@ jobs:
         else
           echo "Error: SecureTomcatJDBC.jar not found in the dist directory."
           exit 1
-        fi
 
   deploy-dev:
     runs-on: ubuntu-latest
@@ -87,7 +95,6 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi
 
     - name: List files
       run: ls -la
@@ -149,7 +156,6 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi
 
     - name: List files
       run: ls -la
