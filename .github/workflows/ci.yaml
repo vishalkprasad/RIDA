@@ -1,7 +1,7 @@
 name: Build, Upload, and Commit Artifact
 
 on:
-  #push:
+  push:
     branches:
       - main
 
@@ -21,13 +21,13 @@ jobs:
         distribution: 'temurin'
         
     - name: Build with Ant
-      run: ant -f build.xml jar
+      run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: addition-jar
-        path: Addition.jar
+        name: securetomcatjdbc-jar
+        path: dist/SecureTomcatJDBC.jar
 
     - name: List files in root directory
       run: ls -la
@@ -37,18 +37,17 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Commit Addition JAR
+    - name: Commit JAR
       run: |
         echo "Listing files before git add..."
-        ls -la  # List files to confirm Addition.jar is present
-        if [ -f Addition.jar ]; then
-          git add Addition.jar
-          git commit -m "Add Addition.jar artifact"
+        ls -la  # List files to confirm SecureTomcatJDBC.jar is present
+        if [ -f dist/SecureTomcatJDBC.jar ]; then
+          git add dist/SecureTomcatJDBC.jar
+          git commit -m "Add SecureTomcatJDBC.jar artifact"
           git push origin main
         else
-          echo "Error: Addition.jar not found in the root directory."
+          echo "Error: SecureTomcatJDBC.jar not found in the dist directory."
           exit 1
-        fi
 
   deploy-dev:
     runs-on: ubuntu-latest
@@ -75,9 +74,6 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    #- name: Pull Latest Changes
-      #run: git pull origin main
-
     - name: Commit and Push AppSpec File
       run: |
          echo "Listing files before git add..."
@@ -90,8 +86,6 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi
-
 
     - name: List files
       run: ls -la
@@ -116,9 +110,9 @@ jobs:
         body: |
           @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
 
-  deploy-Tst:
+  deploy-tst:
     runs-on: ubuntu-latest
-    needs: deploy-dev
+    needs: build
   
     environment:
       name: Test
@@ -131,7 +125,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copy AppSpec File for Tst
+    - name: Copy AppSpec File for Test
       run: |
         cp appspec-tst.yml appspec.yml
         ls -la  # Verify the file is copied
@@ -141,9 +135,6 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    #- name: Pull Latest Changes
-      #run: git pull origin main
-
     - name: Commit and Push AppSpec File
       run: |
          echo "Listing files before git add..."
@@ -151,12 +142,11 @@ jobs:
          
          if [ -f appspec.yml ]; then
            git add appspec.yml
-           git commit -m "Update appspec.yml file for Tst" --allow-empty
+           git commit -m "Update appspec.yml file for Test" --allow-empty
            git push origin main
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
-         fi
 
     - name: List files
       run: ls -la
@@ -179,4 +169,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
+          @${{ github.actor }} this was deployed as ${{ steps.deploy-tst.outputs.deploymentId }} to group `${{ steps.deploy-tst.outputs.deploymentGroupName }}`.
