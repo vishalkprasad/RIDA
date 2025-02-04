@@ -1,7 +1,7 @@
 name: Build, Upload, and Commit Artifact
 
 on:
-  push:
+  #push:
     branches:
       - main
 
