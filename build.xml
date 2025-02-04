@@ -2,7 +2,14 @@
     <property name="src.dir" value="src"/>
     <property name="build.dir" value="build"/>
     <property name="dist.dir" value="dist"/>
+    <property name="lib.dir" value="lib"/>
     <property name="jar.name" value="SecureTomcatJDBC.jar"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
@@ -11,7 +18,7 @@
 
     <target name="compile">
         <mkdir dir="${build.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${build.dir}">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath">
             <include name="GPVPasswordSDK.java"/>
             <include name="SecureTomcatDataSourceImpl.java"/>
         </javac>
