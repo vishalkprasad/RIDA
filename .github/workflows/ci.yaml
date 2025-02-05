@@ -1,5 +1,3 @@
-name: Build, Upload, and Commit Artifact
-
 on:
   push:
     branches:
@@ -24,9 +22,9 @@ jobs:
       run: |
         mkdir -p lib
         cd lib
-        curl -L -o javapasswordsdk-1.0.jar https://example.com/path/to/javapasswordsdk-1.0.jar
+        curl -L -o javapasswordsdk.jar https://example.com/path/to/javapasswordsdk.jar
         curl -L -o commons-logging-1.2.jar https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar
-        curl -L -o tomcat-jdbc-9.0.50.jar https://repo1.maven.org/maven2/org/apache/tomcat/tomcat-jdbc/9.0.50/tomcat-jdbc-9.0.50.jar
+        curl -L -o SecureTomcatJDBC.jar https://repo1.maven.org/maven2/org/apache/tomcat/tomcat-jdbc/9.0.50/tomcat-jdbc-9.0.50.jar
         cd ..
 
     - name: Build with Ant
@@ -88,7 +86,7 @@ jobs:
          echo "Listing files before git add..."
          ls -la  # List files to confirm appspec.yml is present
          
-         if [ -f appspec.yml]; then
+         if [ -f appspec.yml ]; then
            git add appspec.yml
            git commit -m "Update appspec.yml file for Dev" --allow-empty
            git push origin main
@@ -149,7 +147,7 @@ jobs:
          echo "Listing files before git add..."
          ls -la  # List files to confirm appspec.yml is present
          
-         if [ -f appspec.yml]; then
+         if [ -f appspec.yml ]; then
            git add appspec.yml
            git commit -m "Update appspec.yml file for Test" --allow-empty
            git push origin main
