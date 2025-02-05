@@ -28,7 +28,7 @@ jobs:
         cd ..
 
     - name: Build with Ant
-      run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
+      run: ant -f build.xml -propertyfile gpv.properties -propertyfile gpv.properties jar
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
