@@ -24,7 +24,7 @@ jobs:
       run: |
         mkdir -p lib
         cd lib
-        curl -L -o tomcat-juli.jar https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.50/bin/extras/tomcat-juli.jar
+        curl -L -o tomcat-juli.jar https://repo1.maven.org/maven2/org/apache/tomcat/tomcat-juli/9.0.50/tomcat-juli-9.0.50.jar
         cd ..
 
     - name: Verify JAR file integrity
