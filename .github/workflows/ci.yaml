@@ -20,30 +20,6 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    - name: Create lib directory and download dependencies
-      run: |
-        mkdir -p lib
-        cd lib
-        curl -L -o tomcat-juli.jar https://repo1.maven.org/maven2/org/apache/tomcat/tomcat-juli/9.0.50/tomcat-juli-9.0.50.jar
-        cd ..
-
-    - name: Verify JAR file integrity
-      run: |
-        if ! unzip -t lib/tomcat-juli.jar; then
-          echo "Error: tomcat-juli.jar is corrupted."
-          exit 1
-        fi
-
-    - name: Commit and Push JAR files
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        echo "Listing files before git add..."
-        ls -la
-        git add lib/tomcat-juli.jar
-        git commit -m "Add tomcat-juli.jar to lib directory"
-        git push origin main
-
     - name: Build with Ant
       run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
 
@@ -72,6 +48,7 @@ jobs:
         else
           echo "Error: SecureTomcatJDBC.jar not found in the dist directory."
           exit 1
+        fi
 
   deploy-dev:
     runs-on: ubuntu-latest
