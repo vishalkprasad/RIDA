@@ -20,8 +20,23 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
+    - name: Create lib directory and download dependencies
+      run: |
+        mkdir -p lib
+        cd lib
+        curl -L -o tomcat-juli.jar https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.50/bin/extras/tomcat-juli.jar
+        cd ..
+
+    - name: Commit and Push JAR files
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add lib/tomcat-juli.jar
+        git commit -m "Add tomcat-juli.jar to lib directory"
+        git push origin main
+
     - name: Build with Ant
-      run: ant -f build.xml -propertyfile gpv.properties -propertyfile gpv.properties jar
+      run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
