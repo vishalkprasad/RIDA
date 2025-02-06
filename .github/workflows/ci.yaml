@@ -38,6 +38,8 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        echo "Listing files before git add..."
+        ls -la
         git add lib/tomcat-juli.jar
         git commit -m "Add tomcat-juli.jar to lib directory"
         git push origin main
