@@ -27,9 +27,3 @@
         <jar destfile="${dist.dir}/${jar.name}" basedir="${build.dir}"/>
     </target>
 </project>
-
-    <target name="jar" depends="compile">
-        <mkdir dir="${dist.dir}"/>
-        <jar destfile="${dist.dir}/${jar.name}" basedir="${build.dir}"/>
-    </target>
-</project>
