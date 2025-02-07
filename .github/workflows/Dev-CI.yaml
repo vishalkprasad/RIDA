@@ -1,4 +1,4 @@
-name: Build, Upload, Commit Artifact & Deploy
+name: Dev-CI.yaml
 
 on:
   push:
