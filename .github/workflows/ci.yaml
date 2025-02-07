@@ -75,23 +75,17 @@ jobs:
       run: |
          echo "Listing files before git add..."
          ls -la  # List files to confirm appspec.yml is present
-         
+    
          if [ -f appspec.yml ]; then
-           git add appspec.yml
-           git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
-           git push origin main
-         date and time
-           git add appspec.yml
-           git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
-           git push origin main
+            echo "# Updated on $(date)" >> appspec.yml  # Append a comment with the current date and time
+            git add appspec.yml
+            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
+            git push origin main
          else
-          echo "Error: appspec.yml not found in the root directory."
-          exit 1 
+            echo "Error: appspec.yml not found in the root directory."
+         exit 1 
          fi
-    - name: Create Deployment Archive
-      run: |
-        zip -r deployment-dev.zip .  # Create a zip archive of the current directory
-        ls -la deployment-dev.zip  # List the contents of the archive to verify
+         
     - name: List files
       run: ls -la
       
