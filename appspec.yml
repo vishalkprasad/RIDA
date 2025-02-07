@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: /devjar/*.jar
+  - source: /devjar/SecureTomcatJDBC-dev.jar
     destination: /home/ec2-user/
     overwrite: true
 branch_config:
@@ -11,4 +11,4 @@ branch_config:
     deploymentGroupConfig:
       serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
             
-# Updated on Fri Feb  7 12:40:26 UTC 2025
+# Updated on Fri Feb  7 12:42:43 UTC 2025
