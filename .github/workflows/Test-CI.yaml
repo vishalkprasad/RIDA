@@ -2,7 +2,7 @@ name: Build & Deploy for Test env
 
 on:
   workflow_run:
-    workflows: ['Dev-CI.yaml']
+    workflows: ['Dev CI']
     types: [completed]
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
     - name: Pull latest changes
       run: git pull origin main
 
-    - name: Commit JAR for Dev
+    - name: Commit JAR for Test
       run: |
         mkdir -p tstjar
         mv dist/SecureTomcatJDBC-tst.jar tstjar/
@@ -50,7 +50,7 @@ jobs:
     needs: build-tst
   
     environment:
-      name: tst
+      name: Test
       url: https://gdbtst.gilead.com  
     permissions:
       id-token: write
@@ -60,7 +60,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Copy AppSpec File for Dev
+    - name: Copy AppSpec File for Test
       run: |
         cp appspec-test.yml appspec.yml
         ls -la  # Verify the file is copied
@@ -93,7 +93,7 @@ jobs:
          if [ -f appspec.yml ]; then
             echo "# Updated on $(date)" >> appspec.yml  # Append a comment with the current date and time
             git add appspec.yml
-            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
+            git commit -m "Update appspec.yml file for Test" || echo "No changes to commit"
             git push origin main
          else
             echo "Error: appspec.yml not found in the root directory."
@@ -139,5 +139,5 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: >
           @${{ github.actor }} this was deployed as ${{
-          steps.deploy-dev.outputs.deploymentId }} to group `${{
-          steps.deploy-dev.outputs.deploymentGroupName }}`.
+          steps.deploy-tst.outputs.deploymentId }} to group `${{
+          steps.deploy-tst.outputs.deploymentGroupName }}`.
