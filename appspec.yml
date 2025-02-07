@@ -11,4 +11,3 @@ branch_config:
     deploymentGroupConfig:
       serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
             
-# Updated on Fri Feb  7 13:47:40 UTC 2025
