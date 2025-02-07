@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Explicitly set the permissions for GITHUB_TOKEN
-    needs: deploy-dev
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
