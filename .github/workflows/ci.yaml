@@ -170,7 +170,7 @@ jobs:
 
   push-appspec-test-yml:
     runs-on: ubuntu-latest
-    needs: build-dev
+    needs: deploy-dev
   
     environment:
       name: Test
