@@ -1,7 +1,6 @@
 name: Build & Deploy for Test env
 
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: ['Dev-CI.yaml']
     types: [completed]
