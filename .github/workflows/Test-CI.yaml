@@ -6,7 +6,7 @@ on:
     types: [completed]
 
 jobs:
-  build-test:
+  build-tst:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Explicitly set the permissions for GITHUB_TOKEN
@@ -21,13 +21,13 @@ jobs:
         distribution: 'temurin'
         
     - name: Build with Ant for Test
-      run: ant -f build.xml -Djar.name=SecureTomcatJDBC-test.jar -propertyfile build-test.properties jar
+      run: ant -f build.xml -Djar.name=SecureTomcatJDBC-tst.jar -propertyfile build-test.properties jar
 
     - name: Upload Artifact for Test
       uses: actions/upload-artifact@v4
       with:
-        name: securetomcatjdbc-test-jar
-        path: dist/SecureTomcatJDBC-test.jar
+        name: securetomcatjdbc-tst-jar
+        path: dist/SecureTomcatJDBC-tst.jar
 
     - name: Configure Git
       run: |
@@ -37,18 +37,21 @@ jobs:
     - name: Pull latest changes
       run: git pull origin main
 
-    - name: Commit JAR for Test
+    - name: Commit JAR for Dev
       run: |
-        mkdir -p testjar
-        mv dist/SecureTomcatJDBC-test.jar testjar/
-        git add testjar/SecureTomcatJDBC-test.jar
-        git commit -m "Add SecureTomcatJDBC-test.jar artifact"
+        mkdir -p tstjar
+        mv dist/SecureTomcatJDBC-tst.jar tstjar/
+        git add tstjar/SecureTomcatJDBC-tst.jar
+        git commit -m "Add SecureTomcatJDBC-tst.jar artifact"
         git push origin main
 
-  push-appspec-test-yml:
+  push-appspec-tst-yml:
     runs-on: ubuntu-latest
-    needs: build-test
-   
+    needs: build-tst
+  
+    environment:
+      name: tst
+      url: https://gdbtst.gilead.com  
     permissions:
       id-token: write
       contents: write
@@ -57,7 +60,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Copy AppSpec File for Test
+    - name: Copy AppSpec File for Dev
       run: |
         cp appspec-test.yml appspec.yml
         ls -la  # Verify the file is copied
@@ -68,7 +71,7 @@ jobs:
     - name: Pull Latest Changes
       run: |
          git stash
-         git pull origin main
+         git pull origin main || true
          git stash pop
          git add appspec.yml
          git commit -m "Update appspec.yml" || echo "No changes to commit"
@@ -90,19 +93,22 @@ jobs:
          if [ -f appspec.yml ]; then
             echo "# Updated on $(date)" >> appspec.yml  # Append a comment with the current date and time
             git add appspec.yml
-            git commit -m "Update appspec.yml file for Test" || echo "No changes to commit"
+            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
             git push origin main
          else
             echo "Error: appspec.yml not found in the root directory."
             exit 1 
          fi
          
-  deploy-test:
+    - name: List files
+      run: ls -la
+  
+  deploy-tst:
     runs-on: ubuntu-latest
-    needs: push-appspec-test-yml
+    needs: push-appspec-tst-yml
     environment:
       name: Test
-      url: https://gdbtest.gilead.com
+      url: https://gdbtst.gilead.com
     permissions:
       id-token: write
       contents: write
@@ -115,15 +121,23 @@ jobs:
         role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
         aws-region: us-west-2
     - name: Create Code Deploy
-      id: deploy-test
+      id: deploy-tst
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_TST
+    - name: Retry Deployment on Failure
+      if: failure()
+      run: |
+        echo "Retrying deployment..."
+        sleep 30  # Wait for 30 seconds before retrying
+        webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+        with:
+          application: RIDA_TST
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: >
           @${{ github.actor }} this was deployed as ${{
-          steps.deploy-test.outputs.deploymentId }} to group `${{
-          steps.deploy-test.outputs.deploymentGroupName }}`.
+          steps.deploy-dev.outputs.deploymentId }} to group `${{
+          steps.deploy-dev.outputs.deploymentGroupName }}`.
