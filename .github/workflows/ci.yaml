@@ -45,7 +45,7 @@ jobs:
         git commit -m "Add SecureTomcatJDBC-dev.jar artifact"
         git push origin main
 
-  push-appspec-devyml:
+  push-appspec-dev-yml:
     runs-on: ubuntu-latest
     needs: build-dev
   
@@ -69,7 +69,13 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
     - name: Pull Latest Changes
-      run: git pull origin main
+      run: |
+         git stash
+         git pull origin main
+         git stash pop
+         git add appspec.yml
+         git commit -m "Update appspec.yml" || echo "No changes to commit"
+         git push origin main
 
     - name: Commit and Push AppSpec File
       run: |
@@ -91,7 +97,7 @@ jobs:
   
   deploy-dev:
    runs-on: ubuntu-latest
-   needs: push-appspec-devyml
+   needs: push-appspec-dev-yml
    environment:
     name: Dev
     url: https://gdbdev.gilead.com
@@ -162,13 +168,13 @@ jobs:
         git commit -m "Add SecureTomcatJDBC-test.jar artifact"
         git push origin main
 
-  deploy-test:
+  push-appspec-test-yml:
     runs-on: ubuntu-latest
-    needs: build-test
+    needs: build-dev
   
     environment:
       name: Test
-      url: https://gdbtst.gilead.com  
+      url: https://gdbtest.gilead.com  
     permissions:
       id-token: write
       contents: write
@@ -186,7 +192,13 @@ jobs:
          git config --global user.name 'github-actions[bot]'
          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
     - name: Pull Latest Changes
-      run: git pull origin main
+      run: |
+         git stash
+         git pull origin main
+         git stash pop
+         git add appspec.yml
+         git commit -m "Update appspec.yml" || echo "No changes to commit"
+         git push origin main
 
     - name: Commit and Push AppSpec File
       run: |
@@ -196,35 +208,45 @@ jobs:
          if [ -f appspec.yml ]; then
             echo "# Updated on $(date)" >> appspec.yml  # Append a comment with the current date and time
             git add appspec.yml
-            git commit -m "Update appspec.yml file for test" || echo "No changes to commit"
+            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
             git push origin main
          else
             echo "Error: appspec.yml not found in the root directory."
          exit 1 
          fi
          
-    - name: List files
-      run: ls -la
-      
+  
+  deploy-test:
+   runs-on: ubuntu-latest
+   needs:  push-appspec-test-yml
+   environment:
+    name: Test
+    url: https://gdbtest.gilead.com
+   permissions:
+    id-token: write
+    contents: write
+   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
         aws-region: us-west-2
-
     - name: Create Code Deploy
-      id: deploy-dev
+      id: deploy-test
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_TST
         appspec-file: appspec.yml
-
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
+        body: >
+          @${{ github.actor }} this was deployed as ${{
+          steps.deploy-test.outputs.deploymentId }} to group `${{
+          steps.deploy-test.outputs.deploymentGroupName }}`.
 
   build-prod:
     runs-on: ubuntu-latest
