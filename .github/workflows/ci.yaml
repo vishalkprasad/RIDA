@@ -80,9 +80,13 @@ jobs:
            git add appspec.yml
            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
            git push origin main
+         date and time
+           git add appspec.yml
+           git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
+           git push origin main
          else
-           echo "Error: appspec.yml not found in the root directory."
-           exit 1 
+          echo "Error: appspec.yml not found in the root directory."
+          exit 1 
          fi
     - name: Create Deployment Archive
       run: |
