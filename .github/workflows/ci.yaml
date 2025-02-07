@@ -45,7 +45,7 @@ jobs:
         git commit -m "Add SecureTomcatJDBC-dev.jar artifact"
         git push origin main
 
-  setupdeploy-dev:
+  push-appspec-devyml:
     runs-on: ubuntu-latest
     needs: build-dev
   
@@ -90,35 +90,38 @@ jobs:
       run: ls -la
   
   deploy-dev:
-    runs-on: ubuntu-latest
-    needs: setupdeploy-dev
-  
-    environment:
-      name: Dev
-      url: https://gdbdev.gilead.com  
-    steps:
+   runs-on: ubuntu-latest
+   needs: push-appspec-devyml
+   environment:
+    name: Dev
+    url: https://gdbdev.gilead.com
+   permissions:
+    id-token: write
+    contents: write
+   steps:
     - name: Checkout code
-      uses: actions/checkout@v3 
-      
+      uses: actions/checkout@v3
     - name: Configure AWS Credentials using OIDC
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
         aws-region: us-west-2
-
     - name: Create Code Deploy
       id: deploy-dev
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_DEV
         appspec-file: appspec.yml
-
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
+        body: >
+          @${{ github.actor }} this was deployed as ${{
+          steps.deploy-dev.outputs.deploymentId }} to group `${{
+          steps.deploy-dev.outputs.deploymentGroupName }}`.
+
+          
   build-test:
     runs-on: ubuntu-latest
     permissions:
