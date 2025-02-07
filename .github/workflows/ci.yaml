@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-dev:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Explicitly set the permissions for GITHUB_TOKEN
@@ -19,155 +19,99 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+        
+    - name: Build with Ant for Dev
+      run: ant -f build.xml -Djar.name=SecureTomcatJDBC-dev.jar -propertyfile build-dev.properties jar
 
-    - name: Build with Ant
-      run: ant -f build.xml -propertyfile build-dev.properties -propertyfile build-tst.properties jar
-
-    - name: Upload Artifact
+    - name: Upload Artifact for Dev
       uses: actions/upload-artifact@v4
       with:
-        name: securetomcatjdbc-jar
-        path: dist/SecureTomcatJDBC.jar
-
-    - name: List files in root directory
-      run: ls -la
+        name: securetomcatjdbc-dev-jar
+        path: dist/SecureTomcatJDBC-dev.jar
 
     - name: Configure Git
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Commit JAR
+    - name: Commit JAR for Dev
       run: |
-        echo "Listing files before git add..."
-        ls -la  # List files to confirm SecureTomcatJDBC.jar is present
-        if [ -f dist/SecureTomcatJDBC.jar ]; then
-          git add dist/SecureTomcatJDBC.jar
-          git commit -m "Add SecureTomcatJDBC.jar artifact"
-          git push origin main
-        else
-          echo "Error: SecureTomcatJDBC.jar not found in the dist directory."
-          exit 1
-        fi
+        mkdir -p devjar
+        mv dist/SecureTomcatJDBC-dev.jar devjar/
+        git add devjar/SecureTomcatJDBC-dev.jar
+        git commit -m "Add SecureTomcatJDBC-dev.jar artifact"
+        git push origin main
 
-  deploy-dev:
+  build-test:
     runs-on: ubuntu-latest
-    needs: build
-  
-    environment:
-      name: Dev
-      url: https://gdbdev.gilead.com  
     permissions:
-      id-token: write
-      contents: write
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Copy AppSpec File for Dev
-      run: |
-        cp appspec-dev.yml appspec.yml
-        ls -la  # Verify the file is copied
-
-    - name: Configure Git
-      run: |
-         git config --global user.name 'github-actions[bot]'
-         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-    - name: Commit and Push AppSpec File
-      run: |
-         echo "Listing files before git add..."
-         ls -la  # List files to confirm appspec.yml is present
-         
-         if [ -f appspec.yml]; then
-           git add appspec.yml
-           git commit -m "Update appspec.yml file for Dev" --allow-empty
-           git push origin main
-         else
-           echo "Error: appspec.yml not found in the root directory."
-           exit 1 
-
-    - name: List files
-      run: ls -la
-      
-    - name: Configure AWS Credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: us-west-2
-
-    - name: Create Code Deploy
-      id: deploy-dev
-      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
-      with:
-        application: RIDA_DEV
-        appspec-file: appspec.yml
-
-    - name: Print Commit Message
-      uses: peter-evans/commit-comment@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-dev.outputs.deploymentId }} to group `${{ steps.deploy-dev.outputs.deploymentGroupName }}`.
-
-  deploy-tst:
-    runs-on: ubuntu-latest
-    needs: build
-  
-    environment:
-      name: Test
-      url: https://gdbtst.gilead.com  
-    permissions:
-      id-token: write
-      contents: write
-    
+      contents: write  # Explicitly set the permissions for GITHUB_TOKEN
+    needs: build-dev
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copy AppSpec File for Test
-      run: |
-        cp appspec-tst.yml appspec.yml
-        ls -la  # Verify the file is copied
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Build with Ant for Test
+      run: ant -f build.xml -Djar.name=SecureTomcatJDBC-test.jar -propertyfile build-test.properties jar
+
+    - name: Upload Artifact for Test
+      uses: actions/upload-artifact@v4
+      with:
+        name: securetomcatjdbc-test-jar
+        path: dist/SecureTomcatJDBC-test.jar
 
     - name: Configure Git
       run: |
-         git config --global user.name 'github-actions[bot]'
-         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Commit and Push AppSpec File
+    - name: Commit JAR for Test
       run: |
-         echo "Listing files before git add..."
-         ls -la  # List files to confirm appspec.yml is present
-         
-         if [ -f appspec.yml]; then
-           git add appspec.yml
-           git commit -m "Update appspec.yml file for Test" --allow-empty
-           git push origin main
-         else
-           echo "Error: appspec.yml not found in the root directory."
-           exit 1 
+        mkdir -p testjar
+        mv dist/SecureTomcatJDBC-test.jar testjar/
+        git add testjar/SecureTomcatJDBC-test.jar
+        git commit -m "Add SecureTomcatJDBC-test.jar artifact"
+        git push origin main
 
-    - name: List files
-      run: ls -la
-      
-    - name: Configure AWS Credentials using OIDC
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::776543442213:role/RIDA_AWS_OIDC_CODEDEPLOY_ROLE
-        aws-region: us-west-2
+  build-prod:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Explicitly set the permissions for GITHUB_TOKEN
+    needs: build-test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Create Code Deploy
-      id: deploy-tst
-      uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+    - name: Set up JDK
+      uses: actions/setup-java@v3
       with:
-        application: RIDA_TST
-        appspec-file: appspec.yml
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Build with Ant for Prod
+      run: ant -f build.xml -Djar.name=SecureTomcatJDBC-prod.jar -propertyfile build-prod.properties jar
 
-    - name: Print Commit Message
-      uses: peter-evans/commit-comment@v2
+    - name: Upload Artifact for Prod
+      uses: actions/upload-artifact@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          @${{ github.actor }} this was deployed as ${{ steps.deploy-tst.outputs.deploymentId }} to group `${{ steps.deploy-tst.outputs.deploymentGroupName }}`.
+        name: securetomcatjdbc-prod-jar
+        path: dist/SecureTomcatJDBC-prod.jar
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Commit JAR for Prod
+      run: |
+        mkdir -p prodjar
+        mv dist/SecureTomcatJDBC-prod.jar prodjar/
+        git add prodjar/SecureTomcatJDBC-prod.jar
+        git commit -m "Add SecureTomcatJDBC-prod.jar artifact"
+        git push origin main
