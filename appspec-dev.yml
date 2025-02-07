@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: /devjar/*.jar
+  - source: /devjar/SecureTomcatJDBC-dev.jar
     destination: /home/ec2-user/
     overwrite: true
 branch_config:
