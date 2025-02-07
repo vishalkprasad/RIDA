@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Explicitly set the permissions for GITHUB_TOKEN
+    needs: deploy-dev
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -58,7 +59,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Copy AppSpec File for Dev
+    - name: Copy AppSpec File for Test
       run: |
         cp appspec-test.yml appspec.yml
         ls -la  # Verify the file is copied
@@ -91,11 +92,11 @@ jobs:
          if [ -f appspec.yml ]; then
             echo "# Updated on $(date)" >> appspec.yml  # Append a comment with the current date and time
             git add appspec.yml
-            git commit -m "Update appspec.yml file for Dev" || echo "No changes to commit"
+            git commit -m "Update appspec.yml file for Test" || echo "No changes to commit"
             git push origin main
          else
             echo "Error: appspec.yml not found in the root directory."
-         exit 1 
+            exit 1 
          fi
          
   deploy-test:
@@ -120,7 +121,6 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_TST
-        appspec-file: appspec.yml
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
