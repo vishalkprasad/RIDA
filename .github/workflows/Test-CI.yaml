@@ -128,11 +128,17 @@ jobs:
     - name: Retry Deployment on Failure
       if: failure()
       run: |
-        echo "Retrying deployment..."
-        sleep 30  # Wait for 30 seconds before retrying
-        webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
-        with:
-          application: RIDA_TST
+        for i in {1..3}; do
+          echo "Attempt $i: Retrying deployment..."
+          sleep 30  # Wait for 30 seconds before retrying
+          webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+          with:
+            application: RIDA_TST
+          if [ $? -eq 0 ]; then
+            echo "Deployment succeeded on attempt $i"
+            break
+          fi
+        done
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
