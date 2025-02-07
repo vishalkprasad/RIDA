@@ -80,6 +80,8 @@ jobs:
          else
            echo "Error: appspec.yml not found in the root directory."
            exit 1 
+         fi
+         
     - name: List files
       run: ls -la
       
