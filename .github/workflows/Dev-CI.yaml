@@ -125,6 +125,14 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_DEV
+    - name: Retry Deployment on Failure
+      if: failure()
+      run: |
+        echo "Retrying deployment..."
+        sleep 30  # Wait for 30 seconds before retrying
+        webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
+        with:
+          application: RIDA_DEV
     - name: Print Commit Message
       uses: peter-evans/commit-comment@v2
       with:
