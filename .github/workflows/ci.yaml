@@ -34,6 +34,9 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Pull latest changes
+      run: git pull origin main
+
     - name: Commit JAR for Dev
       run: |
         mkdir -p devjar
@@ -71,6 +74,9 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Pull latest changes
+      run: git pull origin main
+
     - name: Commit JAR for Test
       run: |
         mkdir -p testjar
@@ -107,6 +113,9 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Pull latest changes
+      run: git pull origin main
 
     - name: Commit JAR for Prod
       run: |
