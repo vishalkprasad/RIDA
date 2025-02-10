@@ -1,19 +1,13 @@
 version: 0.0
 os: linux
 files:
-  - source: /testjar/SecureTomcatJDBC-test.jar
-    destination: /home/ec2-user/test/
+  - source: /devjar/SecureTomcatJDBC-dev.jar
+    destination: /home/ec2-user/
     overwrite: true
-file_exists_behavior: OVERWRITE
-#hooks:
-  #BeforeInstall:
-    #- location: script/backup_and_delete.sh
-      #timeout: 300
-      #runas: root
 branch_config:
-    wip\/.*: ~ 
-    main:
-        deploymentGroupName: RIDA_TST_GROUP
-        deploymentGroupConfig:
-            serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
-# Updated on Fri Feb  7 15:09:13 UTC 2025
+  wip\/.*: ~ 
+  main:
+    deploymentGroupName: RIDA_DEV_GROUP
+    deploymentGroupConfig:
+      serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
+            
