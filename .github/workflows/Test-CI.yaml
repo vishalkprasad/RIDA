@@ -125,6 +125,9 @@ jobs:
       uses: webfactory/create-aws-codedeploy-deployment/create-deployment@v0.5.0
       with:
         application: RIDA_TST
+      env:
+        BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        
     - name: Retry Deployment on Failure
       if: failure()
       run: |
