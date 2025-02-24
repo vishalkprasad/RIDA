@@ -1,9 +1,12 @@
 name: test-CI.yaml
 
 on:
-  workflow_run:
-    workflows: ['Dev-CI.yaml']
-    types: [completed]
+  push:
+    branches:
+      - main
+  #workflow_run:
+    #workflows: ['Dev-CI.yaml']
+    #types: [completed]
 
 jobs:
   build-test:
