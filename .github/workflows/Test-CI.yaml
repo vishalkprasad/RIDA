@@ -129,7 +129,7 @@ jobs:
       with:
         application: RIDA_TST
       env:
-        BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name || 'unknown-branch' }}
         
     - name: Retry Deployment on Failure
       if: failure()
