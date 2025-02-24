@@ -16,4 +16,3 @@ branch_config:
         deploymentGroupName: RIDA_TST_GROUP
         deploymentGroupConfig:
             serviceRoleArn: arn:aws:iam::776543442213:role/RIDA_CODEDEPLOY_ROLE
-# Updated on Mon Feb 24 14:37:15 UTC 2025
