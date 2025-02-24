@@ -1,6 +1,9 @@
 name: Build & Deploy for Test env
 
 on:
+  push:
+    branches:
+      - main
   workflow_run:
     workflows: ['Dev-CI.yaml']
     types: [completed]
