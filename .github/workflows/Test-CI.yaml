@@ -1,4 +1,4 @@
-name: Dev-CI.yaml
+name: test-CI.yaml
 
 on:
   workflow_run:
