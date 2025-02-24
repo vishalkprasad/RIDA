@@ -11,6 +11,9 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    environment:
+      name: Test
+      url: https://gdbtst.gilead.com
     permissions:
       contents: write  # Explicitly set the permissions for GITHUB_TOKEN
     steps:
@@ -52,9 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-test
   
-    environment:
-      name: Test
-      url: https://gdbtest.gilead.com  
+    #environment:
+      #name: Test
+      #url: https://gdbtest.gilead.com  
     permissions:
       id-token: write
       contents: write
@@ -109,10 +112,8 @@ jobs:
   deploy-test:
     runs-on: ubuntu-latest
     needs: push-appspec-test-yml
-    environment:
-      name: Test
-      url: https://gdbtst.gilead.com
     permissions:
+    
       id-token: write
       contents: write
     steps:
